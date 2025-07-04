@@ -1,0 +1,47 @@
+#to build and validate the PR and do code check, but does not deploy or push code to the main branch
+name: PR Validation
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: set up go 1.22
+        uses: actions/setup-go@v2
+        with:
+            go-version: 1.22
+
+      - name: Build Go application
+        run: |
+          cd src/product-catalog
+          go mod download
+          go build -o product-catalog-service main.go
+
+      - name: Run unit test
+        run: |
+          cd src/product-catalog
+          go test ./...
+
+  code_quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: set up go 1.22
+        uses: actions/setup-go@v2
+        with:
+            go-version: 1.22
+
+      - name: Run golangci-lint
+        run: |
+          cd src/product-catalog
+          go mod download
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          golangci-lint run 
